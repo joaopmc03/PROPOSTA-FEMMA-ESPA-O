@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breakdown · Femme Espaço × EstrategAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --purple:#6c3eff; --purple-light:#9d6fff; --purple-dim:rgba(108,62,255,0.15);
+    --surface:#13131f; --surface2:#1a1a2e; --border:rgba(255,255,255,0.07);
+    --text:#e8e8f0; --muted:#888; --dim:#555;
+    --green:#5cffa8; --red:#ff6b6b;
+  }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Inter',-apple-system,sans-serif; background:#0d0d14; color:var(--text); min-height:100vh; padding-bottom:120px; }
+
+  /* NAV */
+  nav {
+    position:sticky; top:0; z-index:200;
+    background:rgba(13,13,20,0.95); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:0 40px; display:flex; align-items:center; justify-content:space-between; height:56px;
+  }
+  .nav-logo { display:flex; align-items:center; gap:10px; }
+  .nav-badge { width:30px; height:30px; background:var(--purple); border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; color:white; }
+  .nav-name { font-size:14px; font-weight:600; color:white; }
+  .nav-sep { color:var(--dim); margin:0 8px; }
+  .nav-client { font-size:14px; color:var(--muted); }
+  .nav-links { display:flex; gap:24px; }
+  .nav-links a { font-size:13px; color:var(--dim); text-decoration:none; transition:color .2s; }
+  .nav-links a:hover { color:var(--text); }
+
+  /* HERO */
+  .hero { padding:72px 40px 56px; max-width:960px; margin:0 auto; border-bottom:1px solid var(--border); }
+  .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:var(--purple-dim); border:1px solid rgba(108,62,255,.3); border-radius:100px; padding:5px 14px; font-size:11px; font-weight:600; color:var(--purple-light); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:22px; }
+  .hero h1 { font-size:48px; font-weight:900; line-height:1.1; color:white; margin-bottom:16px; }
+  .hero h1 em { font-style:normal; color:var(--purple-light); }
+  .hero-sub { font-size:16px; color:var(--muted); line-height:1.7; max-width:560px; margin-bottom:36px; }
+  .hero-stats { display:flex; gap:40px; flex-wrap:wrap; }
+  .hero-stat .val { font-size:28px; font-weight:800; color:white; line-height:1; }
+  .hero-stat .val.neg { color:var(--red); }
+  .hero-stat .val.pos { color:var(--green); }
+  .hero-stat .lbl { font-size:12px; color:var(--dim); margin-top:4px; line-height:1.4; }
+
+  /* SECTION */
+  section { padding:64px 40px; max-width:960px; margin:0 auto; }
+  section+section { padding-top:0; }
+  .divider { height:1px; background:var(--border); max-width:960px; margin:0 auto; }
+  .sec-eyebrow { font-size:10px; text-transform:uppercase; letter-spacing:2.5px; color:var(--purple); font-weight:700; margin-bottom:8px; }
+  .sec-title { font-size:28px; font-weight:800; color:white; }
+  .sec-sub { font-size:14px; color:var(--muted); margin-top:6px; line-height:1.6; margin-bottom:32px; }
+
+  /* ── MÓDULOS SELECIONÁVEIS ── */
+  .modulos-grid { display:flex; flex-direction:column; gap:12px; }
+
+  .modulo-card {
+    background:var(--surface); border:2px solid var(--border);
+    border-radius:14px; overflow:hidden;
+    transition:border-color .2s, background .2s;
+    cursor:pointer;
+  }
+  .modulo-card.selected {
+    border-color:var(--purple);
+    background:linear-gradient(135deg,#15122a 0%,#13131f 100%);
+  }
+
+  .modulo-top {
+    padding:20px 24px;
+    display:flex; align-items:center; gap:16px;
+  }
+
+  .modulo-checkbox {
+    width:22px; height:22px; border-radius:6px;
+    border:2px solid var(--dim);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:all .2s;
+    font-size:13px; color:transparent;
+  }
+  .modulo-card.selected .modulo-checkbox {
+    background:var(--purple); border-color:var(--purple); color:white;
+  }
+
+  .modulo-icon { font-size:22px; flex-shrink:0; }
+
+  .modulo-info { flex:1; min-width:0; }
+  .modulo-nome { font-size:15px; font-weight:700; color:white; }
+  .modulo-resumo { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .modulo-right { display:flex; align-items:center; gap:16px; flex-shrink:0; }
+  .modulo-valor { font-size:17px; font-weight:800; color:var(--purple-light); white-space:nowrap; }
+  .modulo-card.selected .modulo-valor { color:var(--green); }
+
+  .modulo-toggle {
+    width:26px; height:26px; background:rgba(255,255,255,.05);
+    border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:var(--dim); transition:transform .25s; flex-shrink:0;
+  }
+  .modulo-card.open .modulo-toggle { transform:rotate(180deg); }
+
+  .modulo-detalhe {
+    display:none; padding:0 24px 22px;
+    border-top:1px solid var(--border);
+  }
+  .modulo-card.open .modulo-detalhe { display:block; }
+
+  .modulo-detalhe-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:18px; }
+  .d-col-title { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); font-weight:600; margin-bottom:10px; }
+  .d-items { display:flex; flex-direction:column; gap:7px; }
+  .d-item { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#bbb; line-height:1.5; }
+  .d-item::before { content:'→'; color:var(--purple-light); font-size:11px; margin-top:2px; flex-shrink:0; }
+  .d-fonte { margin-top:14px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-size:12px; color:var(--dim); line-height:1.5; }
+  .d-fonte strong { color:var(--muted); }
+
+  /* ── CART BAR ── */
+  #cart-bar {
+    position:fixed; bottom:0; left:0; right:0; z-index:300;
+    background:rgba(13,13,20,.97); backdrop-filter:blur(16px);
+    border-top:1px solid var(--border);
+    padding:0 40px;
+    height:72px;
+    display:flex; align-items:center; justify-content:space-between;
+    transform:translateY(100%);
+    transition:transform .3s ease;
+  }
+  #cart-bar.visible { transform:translateY(0); }
+
+  .cart-left { display:flex; align-items:center; gap:28px; }
+  .cart-count { font-size:13px; color:var(--muted); }
+  .cart-count strong { color:white; }
+  .cart-avulso { font-size:13px; color:var(--muted); }
+  .cart-avulso strong { color:white; }
+
+  .cart-center { display:flex; align-items:center; gap:12px; }
+  .cart-pkg-label { font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); }
+  .cart-pkg-name { font-size:14px; font-weight:700; color:var(--purple-light); }
+  .cart-pkg-price { font-size:20px; font-weight:900; color:white; }
+  .cart-pkg-mensal { font-size:12px; color:var(--muted); }
+  .cart-savings { background:rgba(92,255,168,.1); border:1px solid rgba(92,255,168,.25); color:var(--green); font-size:12px; font-weight:700; border-radius:6px; padding:4px 10px; white-space:nowrap; }
+
+  .cart-right {}
+  .cart-cta { background:var(--purple); color:white; border:none; border-radius:10px; padding:12px 24px; font-size:14px; font-weight:700; cursor:pointer; transition:opacity .2s; text-decoration:none; white-space:nowrap; }
+  .cart-cta:hover { opacity:.85; }
+
+  /* ── PLANOS ── */
+  .planos { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+
+  .plano {
+    background:var(--surface); border:2px solid var(--border);
+    border-radius:16px; padding:24px;
+    transition:border-color .3s, background .3s;
+    position:relative;
+  }
+  .plano.match {
+    border-color:var(--purple);
+    background:linear-gradient(135deg,#15122a 0%,#13131f 100%);
+  }
+  .plano.match::before {
+    content:'MELHOR ESCOLHA';
+    position:absolute; top:0; right:0;
+    background:var(--purple); color:white;
+    font-size:9px; font-weight:800; letter-spacing:1.5px;
+    padding:5px 12px; border-bottom-left-radius:8px;
+  }
+
+  .plano-nome { font-size:18px; font-weight:800; color:white; margin-bottom:4px; }
+  .plano-tag { font-size:12px; color:var(--muted); margin-bottom:18px; }
+
+  .plano-preco-setup { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--dim); }
+  .plano-preco-val { font-size:28px; font-weight:900; color:white; line-height:1.1; margin-bottom:4px; }
+  .plano-preco-mensal { font-size:13px; color:var(--purple-light); font-weight:600; margin-bottom:18px; }
+
+  .plano-economia {
+    background:rgba(92,255,168,.08); border:1px solid rgba(92,255,168,.2);
+    border-radius:8px; padding:10px 14px;
+    font-size:12px; color:var(--green); line-height:1.5;
+    margin-bottom:16px; display:none;
+  }
+  .plano.match .plano-economia { display:block; }
+
+  .plano-modulos { display:flex; flex-direction:column; gap:6px; }
+  .plano-modulo { font-size:12px; color:#bbb; display:flex; align-items:center; gap:7px; }
+  .plano-modulo::before { content:'✓'; color:var(--green); font-size:11px; font-weight:700; flex-shrink:0; }
+  .plano-modulo.not-selected::before { content:'✓'; color:var(--dim); }
+  .plano-modulo.in-cart::before { color:var(--green); }
+
+  /* ── MENSALIDADE ── */
+  .mens-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:24px; }
+  .mens-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; }
+  .mens-card.destaque { background:linear-gradient(135deg,#15122a,#13131f); border-color:var(--purple); }
+  .mens-card-label { font-size:10px; text-transform:uppercase; letter-spacing:2px; font-weight:700; color:var(--dim); margin-bottom:14px; }
+  .mens-card.destaque .mens-card-label { color:var(--purple-light); }
+
+  .pagar-nao { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:16px; }
+  .pagar-header { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--border); }
+  .pagar-col { padding:18px 24px; }
+  .pagar-col:first-child { border-right:1px solid var(--border); }
+  .pagar-col-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:8px; }
+  .pagar-col-title { font-size:14px; font-weight:700; color:white; display:flex; align-items:center; margin-bottom:3px; }
+  .pagar-col-sub { font-size:12px; color:var(--dim); }
+  .pagar-body { display:grid; grid-template-columns:1fr 1fr; }
+  .pagar-body-col { padding:20px 24px; }
+  .pagar-body-col:first-child { border-right:1px solid var(--border); }
+
+  .p-item { display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5; margin-bottom:8px; }
+  .p-item:last-child { margin-bottom:0; }
+  .p-item.ok { color:#b0ffd8; }
+  .p-item.ok::before { content:'✓'; color:var(--green); font-weight:700; flex-shrink:0; font-size:12px; margin-top:1px; }
+  .p-item.bad { color:#ffb0b0; }
+  .p-item.bad::before { content:'✕'; color:var(--red); font-weight:700; flex-shrink:0; font-size:12px; margin-top:1px; }
+
+  .mens-nota { background:rgba(108,62,255,.08); border:1px solid rgba(108,62,255,.2); border-radius:12px; padding:16px 20px; font-size:13px; color:#c4a8ff; line-height:1.6; }
+  .mens-nota strong { color:white; }
+
+  /* ── ROI ── */
+  .roi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+  .roi-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; }
+  .roi-card .val { font-size:30px; font-weight:900; color:white; line-height:1; }
+  .roi-card .val.neg { color:var(--red); }
+  .roi-card .val.pos { color:var(--green); }
+  .roi-card .lbl { font-size:13px; color:var(--muted); margin-top:7px; line-height:1.5; }
+  .roi-card .fonte { font-size:10px; color:var(--dim); margin-top:8px; }
+  .roi-calc { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px 26px; }
+  .roi-calc-title { font-size:13px; font-weight:700; color:white; margin-bottom:14px; }
+  .roi-line { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .roi-line:last-child { border-bottom:none; font-weight:700; font-size:14px; }
+  .roi-line .desc { color:var(--muted); }
+  .roi-line .amount { font-weight:600; }
+  .roi-line .amount.pos { color:var(--green); }
+  .roi-line .amount.neg { color:var(--red); }
+
+  /* ── COMPARATIVO ── */
+  .comp-table { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+  .comp-row { display:grid; grid-template-columns:2fr 1fr 1fr; padding:0 28px; border-bottom:1px solid var(--border); }
+  .comp-row:last-child { border-bottom:none; }
+  .comp-row.header { background:rgba(255,255,255,.03); padding:14px 28px; }
+  .comp-cell { padding:14px 0; font-size:13px; color:#bbb; display:flex; align-items:center; }
+  .comp-row.header .comp-cell { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); font-weight:600; padding:0; }
+  .comp-cell.feature { color:white; font-weight:500; padding-right:16px; }
+  .comp-cell.center { justify-content:center; }
+  .comp-header-label { font-size:14px; font-weight:700; color:white; }
+  .comp-header-label.hl { color:var(--purple-light); }
+  .comp-header-price { font-size:11px; color:var(--muted); margin-top:2px; }
+  .badge-sim { background:rgba(92,255,168,.1); border:1px solid rgba(92,255,168,.25); color:var(--green); border-radius:6px; padding:3px 12px; font-size:11px; font-weight:600; }
+  .badge-nao { background:rgba(255,107,107,.1); border:1px solid rgba(255,107,107,.2); color:#ff9090; border-radius:6px; padding:3px 12px; font-size:11px; font-weight:600; }
+
+  /* ── CALL ── */
+  .pergs { display:flex; flex-direction:column; gap:10px; }
+  .perg { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 18px; display:flex; align-items:flex-start; gap:12px; font-size:13px; color:#bbb; line-height:1.5; }
+  .perg-num { background:var(--purple-dim); color:var(--purple-light); font-size:11px; font-weight:800; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .perg-hint { font-size:11px; color:var(--dim); margin-top:3px; }
+  .args { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+  .arg { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--purple); border-radius:0 10px 10px 0; padding:16px 20px; }
+  .arg-title { font-size:14px; font-weight:700; color:white; margin-bottom:5px; }
+  .arg-body { font-size:13px; color:var(--muted); line-height:1.6; }
+  .arg-body strong { color:var(--text); }
+
+  /* ── FONTES ── */
+  .fontes-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .fonte-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .fonte-card .nome { font-size:13px; font-weight:600; color:white; margin-bottom:3px; }
+  .fonte-card .desc { font-size:12px; color:var(--dim); line-height:1.5; }
+
+  /* ── FECHAMENTO ── */
+  .fechamento { background:linear-gradient(135deg,#15122a 0%,#0d0d14 100%); border:1px solid rgba(108,62,255,.3); border-radius:20px; padding:48px; text-align:center; }
+  .fechamento h2 { font-size:30px; font-weight:900; color:white; margin-bottom:10px; line-height:1.2; }
+  .fechamento h2 em { font-style:normal; color:var(--purple-light); }
+  .fechamento p { font-size:15px; color:var(--muted); line-height:1.6; max-width:460px; margin:0 auto 28px; }
+  .cta-group { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+  .cta-primary { background:var(--purple); color:white; border:none; border-radius:10px; padding:13px 26px; font-size:14px; font-weight:700; cursor:pointer; text-decoration:none; transition:opacity .2s; }
+  .cta-primary:hover { opacity:.85; }
+  .cta-secondary { background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:10px; padding:13px 26px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; transition:border-color .2s,color .2s; }
+  .cta-secondary:hover { border-color:var(--purple-light); color:white; }
+
+  footer { max-width:960px; margin:0 auto; padding:24px 40px 40px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); }
+  footer .brand { font-size:13px; color:var(--dim); }
+  footer .contact { font-size:13px; color:var(--dim); text-align:right; }
+
+  @media(max-width:700px){
+    nav { padding:0 16px; }
+    .nav-links { display:none; }
+    section { padding:48px 16px; }
+    .hero { padding:48px 16px 40px; }
+    .hero h1 { font-size:32px; }
+    .planos { grid-template-columns:1fr; }
+    .mens-grid { grid-template-columns:1fr; }
+    .roi-grid { grid-template-columns:1fr; }
+    .modulo-detalhe-grid { grid-template-columns:1fr; }
+    .pagar-header,.pagar-body { grid-template-columns:1fr; }
+    .pagar-col:first-child,.pagar-body-col:first-child { border-right:none; border-bottom:1px solid var(--border); }
+    .comp-row { grid-template-columns:1.4fr 1fr 1fr; padding:0 14px; }
+    .fontes-grid { grid-template-columns:1fr; }
+    .fechamento { padding:28px 20px; }
+    footer { flex-direction:column; gap:10px; padding:20px 16px 32px; }
+    #cart-bar { padding:0 16px; height:auto; min-height:72px; flex-wrap:wrap; gap:8px; padding-top:12px; padding-bottom:12px; }
+    .cart-center { flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-badge">EA</div>
+    <span class="nav-name">EstrategAI</span>
+    <span class="nav-sep">/</span>
+    <span class="nav-client">Femme Espaço</span>
+  </div>
+  <div class="nav-links">
+    <a href="#servicos">Serviços</a>
+    <a href="#planos">Planos</a>
+    <a href="#mensalidade">Mensalidade</a>
+    <a href="#roi">ROI</a>
+    <a href="#call">Call</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Breakdown Comercial · Abril 2026</div>
+  <h1>Monte o sistema<br><em>da Femme Espaço.</em></h1>
+  <p class="hero-sub">Selecione os módulos que fazem sentido para o momento do salão. O valor se calcula automaticamente — e mostramos qual plano cobre tudo com desconto.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="val neg">20%</div><div class="lbl">clientes novos perdidos<br>sem resposta após o horário</div></div>
+    <div class="hero-stat"><div class="val neg">25%</div><div class="lbl">taxa de no-show sem<br>lembrete automático</div></div>
+    <div class="hero-stat"><div class="val pos">15 dias</div><div class="lbl">para o sistema<br>estar no ar</div></div>
+    <div class="hero-stat"><div class="val pos">∞</div><div class="lbl">o sistema é da Femme<br>pra sempre</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SERVIÇOS -->
+<section id="servicos">
+  <div class="sec-eyebrow">Serviços</div>
+  <div class="sec-title">Selecione o que a Femme precisa</div>
+  <p class="sec-sub">Clique para selecionar. Expanda para ver o detalhamento completo de cada entrega.</p>
+
+  <div class="modulos-grid">
+
+    <!-- Agenda -->
+    <div class="modulo-card" data-id="agenda" data-valor="2500" data-pacote="starter">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📅</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Agenda Online por Profissional</div>
+          <div class="modulo-resumo">Calendário digital com link de agendamento — sem WhatsApp manual</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 2.500</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Calendário separado por profissional com horários disponíveis</div>
+              <div class="d-item">Bloqueio automático de conflitos — sem horário duplo</div>
+              <div class="d-item">Link público de agendamento no nome da Femme Espaço</div>
+              <div class="d-item">Visão diária e semanal da agenda completa</div>
+              <div class="d-item">Cadastro de serviços com duração e preço</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Elimina conflitos marcados no grupo manualmente</div>
+              <div class="d-item">Cliente agenda a qualquer hora sem depender de resposta</div>
+              <div class="d-item">Base para todos os outros módulos funcionarem integrados</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Sistemas de agenda customizados para salões custam R$ 2.000–6.000 em agências. Fonte: levantamento de fornecedores nacionais — abr/2026.</div>
+      </div>
+    </div>
+
+    <!-- Bot WhatsApp -->
+    <div class="modulo-card" data-id="bot" data-valor="3500" data-pacote="inteligente">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">💬</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Bot WhatsApp Agendamento 24/7</div>
+          <div class="modulo-resumo">Responde, verifica horários e confirma agendamentos automaticamente</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 3.500</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Integração com o número de WhatsApp da Femme via Evolution API</div>
+              <div class="d-item">Fluxo completo: saudação → serviço → profissional → horário → confirmação</div>
+              <div class="d-item">IA respondendo dúvidas fora do horário com linguagem natural</div>
+              <div class="d-item">Verificação em tempo real dos horários disponíveis na agenda</div>
+              <div class="d-item">Confirmação automática enviada à cliente após agendamento</div>
+              <div class="d-item">Escalonamento para humano quando necessário</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">20% dos clientes novos perdidos por falta de resposta após horário comercial</div>
+              <div class="d-item">78% dos clientes esperam resposta em menos de 1 hora</div>
+              <div class="d-item">Recepcionista virtual ativa 24h — sem custo CLT</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referências:</strong> Mindbody Report 2024; HubSpot Lead Response 2023. Bot WhatsApp avulso em agências: R$ 2.500–6.000. Fonte: Botmaker, Huggy, Take Blip — abr/2026.</div>
+      </div>
+    </div>
+
+    <!-- Lembretes -->
+    <div class="modulo-card" data-id="lembretes" data-valor="1200" data-pacote="starter">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">🔔</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Lembretes Automáticos Anti No-Show</div>
+          <div class="modulo-resumo">Confirmação 24h e 1h antes — cliente responde pelo WhatsApp</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 1.200</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Mensagem de confirmação automática 24h antes do horário</div>
+              <div class="d-item">Segundo lembrete 1h antes com opção de confirmar ou cancelar</div>
+              <div class="d-item">Cliente responde no próprio WhatsApp — sem abrir app</div>
+              <div class="d-item">Cancelamento libera o horário automaticamente na agenda</div>
+              <div class="d-item">Notificação para a profissional em caso de cancelamento</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">15–25% de no-show em salões sem sistema de confirmação</div>
+              <div class="d-item">Cancelamento antecipado permite remarcar e recuperar a receita</div>
+              <div class="d-item">Elimina custo de ligar para cada cliente manualmente</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referências:</strong> SEBRAE Beleza e Estética 2022 — 15–25% no-show sem confirmação. Booksy 2023 — lembretes reduzem no-show em até 60%.</div>
+      </div>
+    </div>
+
+    <!-- Fichas -->
+    <div class="modulo-card" data-id="fichas" data-valor="1500" data-pacote="starter">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">👤</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Fichas de Clientes Completas</div>
+          <div class="modulo-resumo">Histórico, dados de contato e visitas — tudo num perfil único</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 1.500</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Perfil com nome, telefone, data de nascimento e observações gerais</div>
+              <div class="d-item">Histórico completo de visitas com data, serviço, profissional e valor</div>
+              <div class="d-item">Contador de visitas e data da última visita</div>
+              <div class="d-item">Busca instantânea por nome ou telefone</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Histórico hoje está no grupo de WhatsApp, papel ou na memória</div>
+              <div class="d-item">Profissional sabe o que foi feito antes de tocar no cabelo da cliente</div>
+              <div class="d-item">Base para campanhas de reativação de clientes inativos</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Retenção sobe 27% com CRM estruturado vs. controle manual. Fonte: Salon Today Business Report 2023.</div>
+      </div>
+    </div>
+
+    <!-- Prontuário -->
+    <div class="modulo-card" data-id="prontuario" data-valor="2000" data-pacote="inteligente">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📋</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Prontuário Digital por Atendimento</div>
+          <div class="modulo-resumo">Alergias, produtos usados e observações técnicas — vinculado a cada visita</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 2.000</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Registro por atendimento: data, profissional, serviço realizado</div>
+              <div class="d-item">Campo de alergias com alerta visual ao abrir a ficha</div>
+              <div class="d-item">Produtos utilizados com marca, linha e quantidade</div>
+              <div class="d-item">Observações técnicas livres por atendimento</div>
+              <div class="d-item">Histórico cronológico acessível no celular durante o atendimento</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Elimina risco de aplicar produto que causou reação antes</div>
+              <div class="d-item">Profissional nova atende com o mesmo padrão de quem conhece a cliente</div>
+              <div class="d-item">Prontuário no papel some, rasga, ninguém acha</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Ausência de prontuário é causa frequente de reclamação no setor. Fonte: PROCON-BA, registros de reclamações em estética 2022–2024.</div>
+      </div>
+    </div>
+
+    <!-- Galeria -->
+    <div class="modulo-card" data-id="galeria" data-valor="1500" data-pacote="inteligente">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📸</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Galeria de Fotos Antes/Depois</div>
+          <div class="modulo-resumo">Fotos por atendimento salvas no perfil da cliente — visíveis na próxima visita</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 1.500</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Upload de fotos pelo celular durante o atendimento</div>
+              <div class="d-item">Fotos vinculadas ao atendimento específico (data + serviço)</div>
+              <div class="d-item">Galeria cronológica no perfil da cliente</div>
+              <div class="d-item">Armazenamento em nuvem com backup automático</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Profissional vê como estava o cabelo na última visita antes de começar</div>
+              <div class="d-item">Evita desentendimento sobre resultado — referência visual clara</div>
+              <div class="d-item">Material para portfólio e redes sociais</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Funcionalidade disponível apenas em planos premium de Fresha (£49+/mês) e Mindbody ($139+/mês). Aqui é parte do sistema próprio da Femme. Fonte: pricing abr/2026.</div>
+      </div>
+    </div>
+
+    <!-- Estoque -->
+    <div class="modulo-card" data-id="estoque" data-valor="2000" data-pacote="inteligente">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📦</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Controle de Estoque + Alertas</div>
+          <div class="modulo-resumo">Baixa automática por atendimento e alerta no WhatsApp ao atingir mínimo</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 2.000</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Cadastro de produtos por categoria (coloração, tratamento, descartáveis)</div>
+              <div class="d-item">Baixa automática quando produto é registrado no prontuário</div>
+              <div class="d-item">Configuração de estoque mínimo por produto</div>
+              <div class="d-item">Alerta automático via WhatsApp ao atingir o mínimo</div>
+              <div class="d-item">Relatório de produtos mais usados por período</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Produto que acaba na hora do atendimento gera cancelamento na hora</div>
+              <div class="d-item">Estoque "na cabeça" resulta em compra em excesso ou falta</div>
+              <div class="d-item">Visibilidade real do custo por atendimento</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Módulo de estoque em ERPs para beleza (Salonized) custa R$ 80–200/mês isolado. Aqui integrado ao sistema sem custo adicional. Fonte: pricing Salonized abr/2026.</div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="modulo-card" data-id="dashboard" data-valor="1800" data-pacote="starter">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📊</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Dashboard de Faturamento</div>
+          <div class="modulo-resumo">Faturamento diário, semanal e mensal com desempenho por profissional</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 1.800</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Painel com faturamento do dia, semana e mês em tempo real</div>
+              <div class="d-item">Desempenho individual por profissional</div>
+              <div class="d-item">Serviços mais realizados no período</div>
+              <div class="d-item">Ticket médio por cliente e por profissional</div>
+              <div class="d-item">Comparativo mês a mês</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Gestão sem número é gestão no escuro</div>
+              <div class="d-item">Identifica qual profissional, serviço ou dia gera mais receita</div>
+              <div class="d-item">Base para decisões de precificação e crescimento</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Dashboards customizados de BI para pequenos negócios custam R$ 1.500–4.000 em agências. Fonte: pesquisa freelancers BR, abr/2026.</div>
+      </div>
+    </div>
+
+    <!-- NFS-e -->
+    <div class="modulo-card" data-id="nfse" data-valor="2500" data-pacote="completo">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">🧾</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Emissão de NFS-e Integrada</div>
+          <div class="modulo-resumo">Nota fiscal emitida direto do sistema — sem abrir outro programa</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 2.500</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Integração via API homologada pela Prefeitura de Salvador</div>
+              <div class="d-item">Emissão de NFS-e com um clique ao finalizar o atendimento</div>
+              <div class="d-item">Dados do cliente e serviço preenchidos automaticamente</div>
+              <div class="d-item">Envio automático da NF por e-mail para o cliente</div>
+              <div class="d-item">Histórico de notas emitidas com download em PDF</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Requisito técnico</div>
+            <div class="d-items">
+              <div class="d-item">Certificado digital A1 da empresa (responsabilidade da Femme)</div>
+              <div class="d-item">CNPJ ativo com atividade de prestação de serviços</div>
+              <div class="d-item">Cadastro ativo no portal da prefeitura</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> Integração NFS-e avulsa custa R$ 1.500–3.500. NFe.io e eNotas cobram R$ 99–299/mês pelo serviço. Aqui integrado sem mensalidade adicional. Fonte: pricing abr/2026.</div>
+      </div>
+    </div>
+
+    <!-- PWA -->
+    <div class="modulo-card" data-id="pwa" data-valor="1200" data-pacote="starter">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📱</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">PWA Mobile</div>
+          <div class="modulo-resumo">Sistema instalável no celular como app — sem App Store</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 1.200</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Sistema adaptado para celular com instalação via navegador</div>
+              <div class="d-item">Aparece na tela inicial como app nativo</div>
+              <div class="d-item">Funciona offline para dados já carregados</div>
+              <div class="d-item">Atualizações automáticas — sempre na versão mais recente</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Profissional acessa prontuário e galeria no celular durante o atendimento</div>
+              <div class="d-item">Sem custo de App Store (R$ 99/ano Apple + aprovação)</div>
+              <div class="d-item">App nativo custaria R$ 15.000–60.000+; PWA entrega 90% da experiência</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referência:</strong> DZone Mobile 2024; Mobiquity 2023 — PWA entrega experiência equivalente a app nativo a fração do custo.</div>
+      </div>
+    </div>
+
+    <!-- Relatórios -->
+    <div class="modulo-card" data-id="relatorios" data-valor="1800" data-pacote="completo">
+      <div class="modulo-top">
+        <div class="modulo-checkbox">✓</div>
+        <div class="modulo-icon">📈</div>
+        <div class="modulo-info">
+          <div class="modulo-nome">Relatórios Avançados</div>
+          <div class="modulo-resumo">Retenção, ticket médio e serviços em queda — exportável em PDF</div>
+        </div>
+        <div class="modulo-right">
+          <div class="modulo-valor">R$ 1.800</div>
+          <div class="modulo-toggle" onclick="expandir(event,this)">▼</div>
+        </div>
+      </div>
+      <div class="modulo-detalhe">
+        <div class="modulo-detalhe-grid">
+          <div>
+            <div class="d-col-title">O que será entregue</div>
+            <div class="d-items">
+              <div class="d-item">Análise de retenção: clientes que voltaram vs. que sumiram</div>
+              <div class="d-item">Ticket médio por cliente ao longo do tempo</div>
+              <div class="d-item">Serviços em crescimento ou queda no período</div>
+              <div class="d-item">Clientes em risco de churn (sem visita há X dias)</div>
+              <div class="d-item">Exportação de qualquer relatório em PDF</div>
+            </div>
+          </div>
+          <div>
+            <div class="d-col-title">Por que importa</div>
+            <div class="d-items">
+              <div class="d-item">Custa 5x mais captar cliente novo do que reter existente</div>
+              <div class="d-item">Identifica quem parou de ir — e quando agir para recuperar</div>
+              <div class="d-item">Decisões de serviço e preço baseadas em dados reais do salão</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-fonte"><strong>Referências:</strong> Harvard Business Review — reter custa 5–25x menos que captar. Módulos de churn em CRMs como HubSpot: R$ 400–800/mês. Fonte: HBR; HubSpot pricing abr/2026.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PLANOS -->
+<section id="planos">
+  <div class="sec-eyebrow">Planos</div>
+  <div class="sec-title">Quanto você economiza agrupando</div>
+  <p class="sec-sub">O plano recomendado atualiza conforme os módulos selecionados. Sempre mostra a economia real em relação a contratar cada serviço avulso.</p>
+
+  <div class="planos">
+
+    <div class="plano" id="plano-starter">
+      <div class="plano-nome">Starter</div>
+      <div class="plano-tag">O salão sai do papel</div>
+      <div class="plano-preco-setup">Setup único</div>
+      <div class="plano-preco-val">R$ 4.500</div>
+      <div class="plano-preco-mensal">+ R$ 490/mês</div>
+      <div class="plano-economia" id="eco-starter"></div>
+      <div class="plano-modulos">
+        <div class="plano-modulo" data-ref="agenda">Agenda Online por Profissional</div>
+        <div class="plano-modulo" data-ref="fichas">Fichas de Clientes</div>
+        <div class="plano-modulo" data-ref="lembretes">Lembretes Anti No-Show</div>
+        <div class="plano-modulo" data-ref="dashboard">Dashboard de Faturamento</div>
+        <div class="plano-modulo" data-ref="pwa">PWA Mobile</div>
+      </div>
+    </div>
+
+    <div class="plano" id="plano-inteligente">
+      <div class="plano-nome">Inteligente</div>
+      <div class="plano-tag">O sistema trabalha enquanto o salão está fechado</div>
+      <div class="plano-preco-setup">Setup único</div>
+      <div class="plano-preco-val">R$ 8.500</div>
+      <div class="plano-preco-mensal">+ R$ 790/mês</div>
+      <div class="plano-economia" id="eco-inteligente"></div>
+      <div class="plano-modulos">
+        <div class="plano-modulo" data-ref="agenda">Agenda Online por Profissional</div>
+        <div class="plano-modulo" data-ref="fichas">Fichas de Clientes</div>
+        <div class="plano-modulo" data-ref="lembretes">Lembretes Anti No-Show</div>
+        <div class="plano-modulo" data-ref="dashboard">Dashboard de Faturamento</div>
+        <div class="plano-modulo" data-ref="pwa">PWA Mobile</div>
+        <div class="plano-modulo" data-ref="bot">Bot WhatsApp 24/7</div>
+        <div class="plano-modulo" data-ref="prontuario">Prontuário Digital</div>
+        <div class="plano-modulo" data-ref="galeria">Galeria de Fotos</div>
+        <div class="plano-modulo" data-ref="estoque">Controle de Estoque</div>
+      </div>
+    </div>
+
+    <div class="plano" id="plano-completo">
+      <div class="plano-nome">Completo</div>
+      <div class="plano-tag">Gestão profissional de ponta a ponta</div>
+      <div class="plano-preco-setup">Setup único</div>
+      <div class="plano-preco-val">R$ 13.000</div>
+      <div class="plano-preco-mensal">+ R$ 1.090/mês</div>
+      <div class="plano-economia" id="eco-completo"></div>
+      <div class="plano-modulos">
+        <div class="plano-modulo" data-ref="agenda">Agenda Online por Profissional</div>
+        <div class="plano-modulo" data-ref="fichas">Fichas de Clientes</div>
+        <div class="plano-modulo" data-ref="lembretes">Lembretes Anti No-Show</div>
+        <div class="plano-modulo" data-ref="dashboard">Dashboard de Faturamento</div>
+        <div class="plano-modulo" data-ref="pwa">PWA Mobile</div>
+        <div class="plano-modulo" data-ref="bot">Bot WhatsApp 24/7</div>
+        <div class="plano-modulo" data-ref="prontuario">Prontuário Digital</div>
+        <div class="plano-modulo" data-ref="galeria">Galeria de Fotos</div>
+        <div class="plano-modulo" data-ref="estoque">Controle de Estoque</div>
+        <div class="plano-modulo" data-ref="nfse">Emissão de NFS-e</div>
+        <div class="plano-modulo" data-ref="relatorios">Relatórios Avançados</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MENSALIDADE -->
+<section id="mensalidade">
+  <div class="sec-eyebrow">Mensalidade</div>
+  <div class="sec-title">O que você paga todo mês — e o que para se cancelar</div>
+  <p class="sec-sub">A mensalidade não é "taxa de manutenção". É a infraestrutura inteira rodando — VPS, bot, banco de dados, backup e suporte direto.</p>
+
+  <div class="mens-grid">
+    <div class="mens-card">
+      <div class="mens-card-label">Starter · R$ 490/mês</div>
+      <div class="d-items">
+        <div class="d-item">Servidor (VPS) rodando 24/7</div>
+        <div class="d-item">Banco de dados ativo com backup diário</div>
+        <div class="d-item">Domínio e SSL do sistema</div>
+        <div class="d-item">Suporte via WhatsApp — direto comigo</div>
+        <div class="d-item">Correções e ajustes sem custo extra</div>
+        <div class="d-item">Atualizações de segurança inclusas</div>
+      </div>
+    </div>
+    <div class="mens-card destaque">
+      <div class="mens-card-label">Inteligente · R$ 790/mês</div>
+      <div class="d-items">
+        <div class="d-item">Tudo do Starter</div>
+        <div class="d-item">Evolution API ativa (conexão WhatsApp)</div>
+        <div class="d-item">N8N rodando os fluxos de automação</div>
+        <div class="d-item">Bot monitorado — alerta automático se cair</div>
+        <div class="d-item">Armazenamento de fotos em nuvem</div>
+        <div class="d-item">Resposta em até 4h em dias úteis</div>
+      </div>
+    </div>
+    <div class="mens-card">
+      <div class="mens-card-label">Completo · R$ 1.090/mês</div>
+      <div class="d-items">
+        <div class="d-item">Tudo do Inteligente</div>
+        <div class="d-item">API de NFS-e ativa e homologada</div>
+        <div class="d-item">Processamento de relatórios avançados</div>
+        <div class="d-item">Armazenamento expandido</div>
+        <div class="d-item">Prioridade no suporte</div>
+        <div class="d-item">Resposta em até 2h em dias úteis</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pagar-nao">
+    <div class="pagar-header">
+      <div class="pagar-col">
+        <div class="pagar-col-title"><span class="pagar-col-dot" style="background:var(--green)"></span>Mensalidade ativa</div>
+        <div class="pagar-col-sub">Sistema funcionando em plena capacidade</div>
+      </div>
+      <div class="pagar-col">
+        <div class="pagar-col-title"><span class="pagar-col-dot" style="background:var(--red)"></span>Mensalidade cancelada</div>
+        <div class="pagar-col-sub">O que para de funcionar imediatamente</div>
+      </div>
+    </div>
+    <div class="pagar-body">
+      <div class="pagar-body-col">
+        <div class="p-item ok">Bot responde clientes 24/7 normalmente</div>
+        <div class="p-item ok">Agenda disponível para agendamento online</div>
+        <div class="p-item ok">Lembretes sendo enviados automaticamente</div>
+        <div class="p-item ok">Prontuários e fotos acessíveis pela equipe</div>
+        <div class="p-item ok">Estoque atualizado a cada atendimento</div>
+        <div class="p-item ok">Dashboard com dados em tempo real</div>
+        <div class="p-item ok">Backup diário rodando — dados protegidos</div>
+        <div class="p-item ok">Suporte ativo para qualquer ajuste</div>
+      </div>
+      <div class="pagar-body-col">
+        <div class="p-item bad">Bot para — clientes ficam sem resposta</div>
+        <div class="p-item bad">Sistema fica offline ou inacessível</div>
+        <div class="p-item bad">Lembretes param — no-show volta imediatamente</div>
+        <div class="p-item bad">Fotos e prontuários ficam inacessíveis</div>
+        <div class="p-item bad">Estoque para de ser atualizado</div>
+        <div class="p-item bad">Dashboard congela sem novos dados</div>
+        <div class="p-item bad">Sem backup — risco real de perda de dados</div>
+        <div class="p-item bad">Sem suporte — bugs ficam sem correção</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mens-nota">
+    <strong>Importante:</strong> os dados das clientes ficam salvos no banco mesmo se a mensalidade for cancelada. Nenhum dado é deletado automaticamente. O que para é a infraestrutura que os serve — o sistema fica offline, mas os dados existem e podem ser reativados.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COMPARATIVO -->
+<section>
+  <div class="sec-eyebrow">Comparativo</div>
+  <div class="sec-title">Sistema Femme vs. Trinks</div>
+  <p class="sec-sub">O Trinks é a referência mais usada no setor — mas foi feito para qualquer salão, não para a Femme.</p>
+  <div class="comp-table">
+    <div class="comp-row header">
+      <div class="comp-cell"></div>
+      <div class="comp-cell center"><div><div class="comp-header-label">Trinks Pro</div><div class="comp-header-price">R$ 500+/mês para sempre</div></div></div>
+      <div class="comp-cell center"><div><div class="comp-header-label hl">Sistema Femme</div><div class="comp-header-price">Setup único + manutenção baixa</div></div></div>
+    </div>
+    <div class="comp-row"><div class="comp-cell feature">Agenda online por profissional</div><div class="comp-cell center"><span class="badge-sim">Sim</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Bot WhatsApp 24/7</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Prontuário técnico por atendimento</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Galeria de fotos antes/depois</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">IA respondendo fora do horário</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Construído para o jeito da Femme</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Seus dados sob seu controle</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Para de pagar e o sistema é seu</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+    <div class="comp-row"><div class="comp-cell feature">Suporte direto com quem construiu</div><div class="comp-cell center"><span class="badge-nao">Não</span></div><div class="comp-cell center"><span class="badge-sim">Sim</span></div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ROI -->
+<section id="roi">
+  <div class="sec-eyebrow">Retorno sobre Investimento</div>
+  <div class="sec-title">O sistema se paga antes de 1 ano</div>
+  <p class="sec-sub">Cálculo conservador com dados reais do setor.</p>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="val neg">20%</div><div class="lbl">dos clientes novos perdidos por falta de resposta fora do horário</div><div class="fonte">Mindbody Wellness Report 2024</div></div>
+    <div class="roi-card"><div class="val neg">15–25%</div><div class="lbl">taxa de no-show em salões sem lembrete automático</div><div class="fonte">SEBRAE Beleza 2022 · Booksy 2023</div></div>
+    <div class="roi-card"><div class="val pos">5x</div><div class="lbl">mais barato reter cliente existente do que captar um novo</div><div class="fonte">Harvard Business Review</div></div>
+  </div>
+  <div class="roi-calc">
+    <div class="roi-calc-title">Pacote Inteligente — recuperação estimada por mês</div>
+    <div class="roi-line"><div class="desc">3 no-shows eliminados × R$ 150 ticket médio</div><div class="amount pos">+ R$ 450</div></div>
+    <div class="roi-line"><div class="desc">2 clientes novos recuperados pelo bot noturno × R$ 150</div><div class="amount pos">+ R$ 300</div></div>
+    <div class="roi-line"><div class="desc">Mensalidade do sistema</div><div class="amount neg">− R$ 790</div></div>
+    <div class="roi-line"><div class="desc">Resultado líquido estimado por mês</div><div class="amount pos">≈ R$ 0 a + R$ 200</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--dim);margin-top:12px;line-height:1.6;">* Estimativa conservadora. Na prática, o bot e os lembretes costumam recuperar 5–10 horários/mês. Fontes: SEBRAE 2022, Booksy 2023, Mindbody 2024.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- CALL -->
+<section id="call">
+  <div class="sec-eyebrow">Preparação para a Call</div>
+  <div class="sec-title">Perguntas de descoberta</div>
+  <p class="sec-sub">Respostas que definem o escopo exato e o plano mais adequado.</p>
+  <div class="pergs">
+    <div class="perg"><div class="perg-num">1</div><div><div>Quantas profissionais trabalham hoje?</div><div class="perg-hint">Define a complexidade da agenda e número de calendários simultâneos</div></div></div>
+    <div class="perg"><div class="perg-num">2</div><div><div>Usam algum sistema atualmente — Trinks, papel, grupo de WhatsApp?</div><div class="perg-hint">Define se há migração de dados ou se é setup do zero</div></div></div>
+    <div class="perg"><div class="perg-num">3</div><div><div>Qual a maior dor hoje: no-show, falta de resposta fora do horário ou controle interno?</div><div class="perg-hint">Define qual módulo priorizar e qual argumento de fechamento usar</div></div></div>
+    <div class="perg"><div class="perg-num">4</div><div><div>Emitem nota fiscal? Têm certificado digital A1?</div><div class="perg-hint">Define se NFS-e entra no escopo</div></div></div>
+    <div class="perg"><div class="perg-num">5</div><div><div>Qual o volume médio de atendimentos por mês?</div><div class="perg-hint">Define o ROI real e valida o tamanho da operação</div></div></div>
+  </div>
+  <div class="args">
+    <div class="arg"><div class="arg-title">O Trinks cobra pra sempre — e o sistema nunca é delas</div><div class="arg-body">R$ 500/mês × 24 meses = <strong>R$ 12.000 pagos</strong>, sem nunca ser da Femme, sem bot, sem prontuário. Com o Inteligente, em 12 meses o sistema está pago e continua rodando com manutenção baixa.</div></div>
+    <div class="arg"><div class="arg-title">O bot WhatsApp avulso custaria R$ 2.500–6.000 só de setup</div><div class="arg-body">Agências como Botmaker, Huggy e Take Blip cobram isso só pela integração. <strong>Aqui está integrado ao sistema inteiro</strong> — sem mensalidade adicional de plataforma.</div></div>
+    <div class="arg"><div class="arg-title">O mensal cobre infraestrutura real e suporte direto</div><div class="arg-body">VPS 24/7, bot monitorado, backup, <strong>suporte direto via WhatsApp comigo</strong> e correções incluídas. Sem fila, sem ticket, sem terceiro no meio.</div></div>
+    <div class="arg"><div class="arg-title">Garantia sem letras miúdas</div><div class="arg-body">Se qualquer módulo apresentar problema — <strong>reconfiguro e corrijo sem custo adicional</strong>. O risco é meu.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FONTES -->
+<section>
+  <div class="sec-eyebrow">Fontes</div>
+  <div class="sec-title">Dados de mercado utilizados</div>
+  <p class="sec-sub" style="margin-bottom:24px;"></p>
+  <div class="fontes-grid">
+    <div class="fonte-card"><div class="nome">Mindbody Wellness Industry Report 2024</div><div class="desc">20% de perda de clientes novos por falta de resposta fora do horário comercial.</div></div>
+    <div class="fonte-card"><div class="nome">Booksy Industry Insights 2023</div><div class="desc">Lembretes automáticos reduzem no-show em até 60% em salões de beleza.</div></div>
+    <div class="fonte-card"><div class="nome">SEBRAE — Beleza e Estética 2022</div><div class="desc">Taxa de no-show entre 15% e 25% sem sistema de confirmação automática.</div></div>
+    <div class="fonte-card"><div class="nome">Harvard Business Review</div><div class="desc">Reter cliente custa 5–25x menos do que captar um novo.</div></div>
+    <div class="fonte-card"><div class="nome">Salon Today Business Report 2023</div><div class="desc">Retenção sobe 27% com CRM estruturado vs. controle manual.</div></div>
+    <div class="fonte-card"><div class="nome">HubSpot Lead Response Study 2023</div><div class="desc">78% dos clientes esperam resposta em menos de 1 hora após contato.</div></div>
+    <div class="fonte-card"><div class="nome">Trinks, Fresha, Mindbody, NFe.io</div><div class="desc">Preços de planos e módulos avulsos consultados em abr/2026 para base de comparação.</div></div>
+    <div class="fonte-card"><div class="nome">Botmaker, Huggy, Take Blip</div><div class="desc">Referências de preço para bot WhatsApp por agências nacionais especializadas.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section>
+  <div class="fechamento">
+    <h2>Cada dia sem sistema<br><em>é uma cliente que não voltou.</em></h2>
+    <p>Na call, definimos os módulos, fechamos o investimento e assinamos. Sistema no ar em 15 dias.</p>
+    <div class="cta-group">
+      <a href="https://wa.me/5571986948358" class="cta-primary">Chamar no WhatsApp</a>
+      <a href="mailto:estrategai.company@gmail.com" class="cta-secondary">Enviar e-mail</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="brand">EstrategAI · Inteligência Artificial Aplicada a Negócios</div>
+  <div class="contact">estrategai.company@gmail.com · +55 71 98694-8358</div>
+</footer>
+
+<!-- CART BAR -->
+<div id="cart-bar">
+  <div class="cart-left">
+    <div class="cart-count"><strong id="cart-count-num">0</strong> módulos</div>
+    <div class="cart-avulso">Avulso: <strong id="cart-avulso-val">R$ 0</strong></div>
+  </div>
+  <div class="cart-center">
+    <div>
+      <div class="cart-pkg-label">Melhor plano</div>
+      <div class="cart-pkg-name" id="cart-pkg-name">—</div>
+    </div>
+    <div>
+      <div class="cart-pkg-price" id="cart-pkg-price">—</div>
+      <div class="cart-pkg-mensal" id="cart-pkg-mensal"></div>
+    </div>
+    <div class="cart-savings" id="cart-savings" style="display:none"></div>
+  </div>
+  <div class="cart-right">
+    <a href="https://wa.me/5571986948358" class="cart-cta">Fechar com João</a>
+  </div>
+</div>
+
+<script>
+const MODULOS = {
+  agenda:     { valor: 2500, pacote: 'starter' },
+  bot:        { valor: 3500, pacote: 'inteligente' },
+  lembretes:  { valor: 1200, pacote: 'starter' },
+  fichas:     { valor: 1500, pacote: 'starter' },
+  prontuario: { valor: 2000, pacote: 'inteligente' },
+  galeria:    { valor: 1500, pacote: 'inteligente' },
+  estoque:    { valor: 2000, pacote: 'inteligente' },
+  dashboard:  { valor: 1800, pacote: 'starter' },
+  nfse:       { valor: 2500, pacote: 'completo' },
+  pwa:        { valor: 1200, pacote: 'starter' },
+  relatorios: { valor: 1800, pacote: 'completo' },
+};
+
+const PLANOS = {
+  starter:    { nome: 'Starter',    setup: 4500, mensal: 490,  modulos: ['agenda','fichas','lembretes','dashboard','pwa'] },
+  inteligente:{ nome: 'Inteligente',setup: 8500, mensal: 790,  modulos: ['agenda','fichas','lembretes','dashboard','pwa','bot','prontuario','galeria','estoque'] },
+  completo:   { nome: 'Completo',   setup: 13000, mensal: 1090, modulos: ['agenda','fichas','lembretes','dashboard','pwa','bot','prontuario','galeria','estoque','nfse','relatorios'] },
+};
+
+const fmt = v => 'R$ ' + v.toLocaleString('pt-BR');
+let selecionados = new Set();
+
+function toggleModulo(card) {
+  const id = card.dataset.id;
+  if (selecionados.has(id)) {
+    selecionados.delete(id);
+    card.classList.remove('selected');
+  } else {
+    selecionados.add(id);
+    card.classList.add('selected');
+  }
+  atualizar();
+}
+
+function expandir(e, btn) {
+  e.stopPropagation();
+  const card = btn.closest('.modulo-card');
+  card.classList.toggle('open');
+}
+
+document.querySelectorAll('.modulo-card').forEach(card => {
+  card.addEventListener('click', () => toggleModulo(card));
+});
+
+function recomendarPlano() {
+  const sel = [...selecionados];
+  const temCompleto = sel.some(id => MODULOS[id].pacote === 'completo');
+  const temInteligente = sel.some(id => MODULOS[id].pacote === 'inteligente');
+  if (temCompleto) return 'completo';
+  if (temInteligente) return 'inteligente';
+  return 'starter';
+}
+
+function atualizar() {
+  const sel = [...selecionados];
+  const total = sel.reduce((s, id) => s + MODULOS[id].valor, 0);
+  const pkgKey = recomendarPlano();
+  const pkg = PLANOS[pkgKey];
+
+  // cart bar
+  document.getElementById('cart-count-num').textContent = sel.length;
+  document.getElementById('cart-avulso-val').textContent = fmt(total);
+  document.getElementById('cart-pkg-name').textContent = pkg.nome;
+  document.getElementById('cart-pkg-price').textContent = fmt(pkg.setup);
+  document.getElementById('cart-pkg-mensal').textContent = '+ ' + fmt(pkg.mensal) + '/mês';
+
+  const bar = document.getElementById('cart-bar');
+  bar.classList.toggle('visible', sel.length > 0);
+
+  // economia
+  const savingsEl = document.getElementById('cart-savings');
+  if (total > pkg.setup && sel.length > 0) {
+    const eco = total - pkg.setup;
+    savingsEl.textContent = 'Economiza ' + fmt(eco);
+    savingsEl.style.display = 'block';
+  } else {
+    savingsEl.style.display = 'none';
+  }
+
+  // destaque nos planos
+  ['starter','inteligente','completo'].forEach(key => {
+    const el = document.getElementById('plano-' + key);
+    el.classList.toggle('match', key === pkgKey && sel.length > 0);
+    const eco = document.getElementById('eco-' + key);
+    // calcular soma dos módulos selecionados cobertos por este plano
+    const cobertos = sel.filter(id => PLANOS[key].modulos.includes(id));
+    const somaCobertos = cobertos.reduce((s,id) => s + MODULOS[id].valor, 0);
+    const economia = somaCobertos - PLANOS[key].setup;
+    if (key === pkgKey && sel.length > 0 && economia > 0) {
+      eco.textContent = 'Com os módulos selecionados, você economiza ' + fmt(economia) + ' em relação ao avulso.';
+    } else if (key === pkgKey && sel.length > 0) {
+      eco.textContent = 'Melhor plano para os módulos selecionados — setup único cobre tudo.';
+    }
+  });
+
+  // highlight modulos nos planos
+  document.querySelectorAll('.plano-modulo').forEach(m => {
+    const ref = m.dataset.ref;
+    if (selecionados.has(ref)) {
+      m.classList.add('in-cart');
+      m.classList.remove('not-selected');
+    } else {
+      m.classList.remove('in-cart');
+      m.classList.add('not-selected');
+    }
+  });
+}
+</script>
+
+</body>
+</html>
